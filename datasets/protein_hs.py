@@ -16,13 +16,13 @@ from TAGLAS.utils.graph import safe_to_undirected
 from TAGLAS.utils.io import download_hf_file
 
 
-class Cora(TAGDataset):
+class ProteinHS(TAGDataset):
     """Cora co-citation network dataset.
     """
-    graph_description = "This is a co-citation network focusing on artificial intelligence, nodes represent academic papers and edges represent two papers that are co-cited by other papers. "
+    graph_description = "This is a protein-protein interaction network. Nodes represents the proteins and their descriptions, edge represents positive interactions."
 
     def __init__(self,
-                 name: str = "cora",
+                 name: str = "protein_hs",
                  root: Optional[str] = None,
                  transform: Optional[Callable] = None,
                  pre_transform: Optional[Callable] = None,
@@ -31,68 +31,55 @@ class Cora(TAGDataset):
                  ) -> None:
         super().__init__(name, root, transform, pre_transform, pre_filter, **kwargs)
         # Generate random split for link prediction.
-        self.side_data.link_split, self.side_data.keep_edges = generate_link_split(self._data.edge_index)
+        self.side_data.link_split, self.side_data.keep_edges = generate_link_split(self._data.edge_index, train_ratio= 0.85, test_ratio = 0.1)
 
     def raw_file_names(self) -> list:
-        return ["cora.pt", "cora_node.json"]
+        return ["protein_names.txt", "protein_desc.json"]
 
     def download(self) -> None:
-        download_hf_file(HF_REPO_ID, subfolder="Cora", filename="cora.pt", local_dir=self.raw_dir)
-        download_hf_file(HF_REPO_ID, subfolder="Cora", filename="cora_node.json", local_dir=self.raw_dir)
+        download_hf_file(HF_REPO_ID, subfolder="protein_hs", filename="protein_names.txt", local_dir=self.raw_dir)
+        download_hf_file(HF_REPO_ID, subfolder="protein_hs", filename="protein_desc.json", local_dir=self.raw_dir)
 
     def gen_data(self) -> tuple[list[TAGData], Any]:
-        cora_data = torch.load(self.raw_paths[0])
-        data = TAGData(**cora_data.to_dict())
-        delattr(data, "raw_text")
-
-        # process edge index.
-        edge_index = data.edge_index
+        pnames2id = {}
+        edges = []
+        count = 0
+        with open(self.raw_paths[0], "r") as f:
+            lines = f.readlines()
+            for line in lines:
+                names = line.split(",")
+                names = [n.strip() for n in names]
+                for n in names:
+                    if n not in pnames2id:
+                        pnames2id[n] = count
+                        count += 1
+                edges.append([pnames2id[n] for n in names])
+        with open(self.raw_paths[1], "r") as f:
+            protein_desc = json.load(f)
+        full_desc = [None] * count
+        for k in protein_desc:
+            if k not in pnames2id:
+                new_k = k.split(".")[0]
+            else:
+                new_k = k
+            full_desc[pnames2id[new_k]] = f"Protein description: {protein_desc[k]['desc']}. Protein Comment: {protein_desc[k]['comment']}"
+        edge_index = torch.tensor(edges).T
         edge_index, _ = safe_to_undirected(edge_index)
-        data.edge_index = edge_index
 
         # add edge text:
-        edge_text_lst = ["Connected papers are cited together by other papers."]
+        edge_text_lst = ["Connected proteins have positive interaction."]
         edge_map = torch.zeros(edge_index.size(-1), dtype=torch.long)
-        data.edge_attr = edge_text_lst
-        data.edge_map = edge_map
 
-        # save original feature with _original suffix.
-        data.rename_key("x_original", "x")
-        data.node_map = torch.arange(len(data.x_original), dtype=torch.long)
+        data = TAGData(full_desc, edge_index=edge_index, edge_attr=edge_text_lst, edge_map=edge_map)
 
-        # node text
-        node_text_lst = ["Academic paper with title and abstract: " + text for text in
-                         data.raw_texts]
-        # save raw text of node feature with x
-        data.replace_key("x", node_text_lst, "raw_texts")
-
-        # additional label description.
-        with open(self.raw_paths[-1]) as f:
-            category_desc = json.load(f)
-
-        ordered_desc = BaseDict()
-        label_names = []
-        for i in range(len(category_desc)):
-            label = category_desc[i]["name"]
-            label_names.append(label)
-            desc = category_desc[i]["description"]
-            ordered_desc[label] = desc
+        data.node_map = torch.arange(len(full_desc), dtype=torch.long)
 
         # add link prediction label:
-        label_names = label_names + ["No", "Yes"]
+        label_names = ["No", "Yes"]
 
-        data.replace_key("label", label_names, "label_names")
+        data.label = label_names
 
-        data.delete_keys("category_names")
-        data.rename_key("label_map", "y")
-        side_data = BaseDict(
-            node_split=BaseDict({"train": data["train_masks"],
-                                 "val": data["val_masks"],
-                                 "test": data["test_masks"]}),
-            label_description=ordered_desc,
-        )
-
-        data.delete_keys(["train_masks", "val_masks", "test_masks"])
+        side_data = BaseDict()
 
         return [data], side_data
 
@@ -112,9 +99,8 @@ class Cora(TAGDataset):
         Args:
             split (str, optional): Split to use. Defaults to "train".
         """
-        offset = 7
         indexs, labels = self.side_data.link_split[split]
-        label_map = labels + offset
+        label_map = labels
         return indexs, labels, label_map.tolist()
 
     def get_NQA_list(self, label_map: list, **kwargs) -> tuple[list[list], np.ndarray, np.ndarray]:
@@ -139,7 +125,7 @@ class Cora(TAGDataset):
             label_map (list): Mapping to the label for all samples. Will use it to generate answer and question.
             **kwargs: Other arguments.
         """
-        q_list = ["Is two papers co-cited or not? Please answer yes if two papers are co-cited and no if two papers are not co-cited."]
+        q_list = ["Does the two proteins have positive interactions? Please answer yes if two proteins have positive interactions and no if two proteins do not have positive interactions."]
         answer_list = []
         label_features = self.label
         for l in label_map:

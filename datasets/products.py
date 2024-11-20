@@ -42,14 +42,10 @@ class Products(TAGDataset):
         download_hf_file(HF_REPO_ID, subfolder="products", filename="products.json", local_dir=self.raw_dir)
 
     def gen_data(self) -> tuple[list[TAGData], Any]:
-        # class 24 contains products with no title and category from different domain.
-        # class 44, 45, 46 don't have any sample in this subset (haven't check full data from ogb)
-        # remove this two classes from train/val/test mask. replace label with MISSING.
+
         data = torch.load(self.raw_paths[2])
         node_desc = pd.read_csv(self.raw_paths[1])
-        # label_desc = pd.read_csv(osp.join(self.raw_dir, "labelidx2productcategory.csv.gz"), compression='gzip')
 
-        # labels = label_desc["product category"].tolist()
         label_map = data.y.squeeze()
         x_original = data.x
         edge_attr = ["Connected two products are purchased together."]
@@ -65,31 +61,34 @@ class Products(TAGDataset):
         edge_index = data.adj_t.to_symmetric()
         edge_index = to_edge_index(edge_index)[0]
         train_mask, val_mask, test_mask = data.train_mask.squeeze(), data.val_mask.squeeze(), data.test_mask.squeeze()
-        remove_mask = (data.y != 24).squeeze()
-        train_mask = torch.logical_and(train_mask, remove_mask)
-        val_mask = torch.logical_and(val_mask, remove_mask)
-        test_mask = torch.logical_and(test_mask, remove_mask)
 
         node_split = BaseDict(train=torch.where(train_mask)[0],
                               val=torch.where(val_mask)[0],
                               test=torch.where(test_mask)[0])
+
+
 
         with open(self.raw_paths[-1]) as f:
             label_desc = json.load(f)
 
         ordered_desc = BaseDict()
         labels = []
-        for i in range(len(label_desc)):
-            if i in [24, 44, 45]:
-                label = "MISSING"
+        for i in range(46):
+            if i == 24:
+                label = "label 25"
                 labels.append(label)
                 ordered_desc[label] = "MISSING"
             else:
-                label = label_desc[i]["name"]
+                if i < 24:
+                    index = i
+                else:
+                    index = i - 1
+                label = label_desc[index]["name"]
                 labels.append(label)
-                desc = label_desc[i]["description"]
+                desc = label_desc[index]["description"]
                 ordered_desc[label] = desc
-        labels.append("MISSING")
+        labels.append("#508510")
+        ordered_desc["#508510"] = "MISSING"
 
         data = TAGData(x=node_text_list,
                        x_original=x_original,
@@ -124,7 +123,6 @@ class Products(TAGDataset):
         q_list = ["What is the most like category for this product?"]
         answer_list = []
         label_features = c(self.label)
-        label_features.remove("MISSING")
         for l in label_map:
             answer_list.append(label_features[l] + ".")
         a_list, a_idxs = np.unique(np.array(answer_list, dtype=object), return_inverse=True)

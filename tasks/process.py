@@ -162,14 +162,17 @@ def parallel_build_sample_process(task: Any, graph_level: bool = False):
                                 collate_fn=lambda x: x)
             with tqdm(total=len(helper), desc="Generate task samples.") as pbar:
                 for data in loader:
-                    # not sure why need copy to make the process not exceed max_map_count.
-                    data = [d.clone() for d in data]
-                    data_list.extend(data)
+                    # Filter out None values, then clone
+                    data = [d.clone() for d in data if d is not None]
+                    if data:  # Only append when the list is not empty
+                        data_list.extend(data)
                     pbar.update(len(data))
                     del data
             return data_list
 
     for i in tqdm(range(len(helper)), total=len(helper), desc="Generate task samples."):
-        data_list.append(helper[i])
+        sample = helper[i]
+        if sample is not None:  # Filter out None values
+            data_list.append(sample)
 
     return data_list

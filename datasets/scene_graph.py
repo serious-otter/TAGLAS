@@ -146,7 +146,7 @@ class SceneGraph(TAGDataset):
                 id_list.append(image_id)
 
         id_list = torch.tensor(id_list)
-        graph_split = torch.load(self.raw_paths[2])
+        graph_split = torch.load(self.raw_paths[2], weights_only=False)
         train_mask = torch.tensor([True if id in graph_split["train"] else False for id in id_list])
         val_mask = torch.tensor([True if id in graph_split["val"] else False for id in id_list])
         test_mask = torch.tensor([True if id in graph_split["test"] else False for id in id_list])

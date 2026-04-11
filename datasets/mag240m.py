@@ -82,7 +82,7 @@ class MAG240M(TAGDataset):
         update_dict = {}
         key_name_list = ["x", "node_map", "edge_attr", "edge_map", "edge_index", "label", "label_map", "side_data"]
         for i, path in enumerate(self.processed_paths):
-            data = torch.load(path)
+            data = torch.load(path, weights_only=False)
             update_dict[key_name_list[i]] = data
         data = TAGData(**update_dict)
         self.data, self.slices = self.collate([data])
@@ -164,7 +164,7 @@ class MAG240M(TAGDataset):
                 "You can set num_workers to fit your server.")
 
         # only include paper2paper relation as we don't have text features for other two node type.
-        node_split = torch.load(self.raw_paths[1])
+        node_split = torch.load(self.raw_paths[1], weights_only=False)
         node_split = BaseDict(**node_split)
 
         # additional label description.
@@ -187,7 +187,7 @@ class MAG240M(TAGDataset):
         edge_attr = ["Connected two papers have a citation relationship."]
         torch.save(edge_attr, self.processed_paths[2], pickle_protocol=4)
 
-        meta_data = torch.load(self.raw_paths[0])
+        meta_data = torch.load(self.raw_paths[0], weights_only=False)
         num_nodes = meta_data["paper"]
         edge_index = torch.from_numpy(np.load(self.raw_paths[-1]))
         print("begin process edge_index")

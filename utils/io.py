@@ -28,7 +28,7 @@ def torch_safe_save(obj: Any, path: str) -> None:
 def torch_safe_load(path: str, map_location: Any = None) -> Any:
     if osp.exists(path):
         with fsspec.open(path, 'rb') as f:
-            return torch.load(f, map_location)
+            return torch.load(f, map_location=map_location, weights_only=False)
     return None
 
 

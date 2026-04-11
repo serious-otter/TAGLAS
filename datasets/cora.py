@@ -41,7 +41,7 @@ class Cora(TAGDataset):
         download_hf_file(HF_REPO_ID, subfolder="Cora", filename="cora_node.json", local_dir=self.raw_dir)
 
     def gen_data(self) -> tuple[list[TAGData], Any]:
-        cora_data = torch.load(self.raw_paths[0])
+        cora_data = torch.load(self.raw_paths[0], weights_only=False)
         data = TAGData(**cora_data.to_dict())
         delattr(data, "raw_text")
 

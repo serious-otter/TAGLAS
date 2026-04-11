@@ -41,9 +41,9 @@ class TAGDataset(InMemoryDataset, ABC):
         root = (root if root is not None else ROOT)
         root = osp.join(root, self.name)
         super().__init__(root, transform, pre_transform, pre_filter)
-        self.data, self.slices = torch.load(self.processed_paths[0])
+        self.data, self.slices = torch.load(self.processed_paths[0], weights_only=False)
         self.data = self._data.text_input_to_list()
-        self.side_data = torch.load(self.processed_paths[1])
+        self.side_data = torch.load(self.processed_paths[1], weights_only=False)
 
     def _map_to_feature(self, features, feature_map):
         if len(feature_map.shape) == 1:

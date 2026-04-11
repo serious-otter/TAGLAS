@@ -130,9 +130,9 @@ class BaseTask(Dataset, ABC):
         additional_data_path = osp.join(self.processed_dir, self.processed_file_names[2])
         if osp.exists(qa_feature_path) and osp.exists(data_list_path) and osp.exists(additional_data_path):
             print("load task from saved file...")
-            self.question_features, self.answer_features = torch.load(qa_feature_path)
-            self.data_list = torch.load(data_list_path)
-            self.additional_data = torch.load(additional_data_path)
+            self.question_features, self.answer_features = torch.load(qa_feature_path, weights_only=False)
+            self.data_list = torch.load(data_list_path, weights_only=False)
+            self.additional_data = torch.load(additional_data_path, weights_only=False)
             self.__load_features__()
             return True
         else:

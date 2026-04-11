@@ -42,7 +42,7 @@ class Pubmed(TAGDataset):
         download_hf_file(HF_REPO_ID, subfolder="Pubmed", filename="pubmed.json", local_dir=self.raw_dir)
 
     def gen_data(self) -> tuple[list[TAGData], Any]:
-        pubmed_data = torch.load(osp.join(self.raw_dir, "pubmed.pt"))
+        pubmed_data = torch.load(osp.join(self.raw_dir, "pubmed.pt"), weights_only=False)
         data = TAGData(**pubmed_data.to_dict())
 
         # process edge index.

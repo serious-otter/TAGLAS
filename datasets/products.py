@@ -43,7 +43,7 @@ class Products(TAGDataset):
 
     def gen_data(self) -> tuple[list[TAGData], Any]:
 
-        data = torch.load(self.raw_paths[2])
+        data = torch.load(self.raw_paths[2], weights_only=False)
         node_desc = pd.read_csv(self.raw_paths[1])
 
         label_map = data.y.squeeze()

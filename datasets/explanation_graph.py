@@ -113,7 +113,7 @@ class ExplaGraph(TAGDataset):
                         )
             )
 
-        graph_split = BaseDict(**torch.load(self.raw_paths[1]))
+            graph_split = BaseDict(**torch.load(self.raw_paths[1], weights_only=False))
         side_data = BaseDict(graph_split=graph_split,
                              question_texts=unique_question_text,
                              node_texts=unique_node_text,

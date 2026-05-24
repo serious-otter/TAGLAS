@@ -5,8 +5,8 @@ from typing import (
 import numpy as np
 from scipy.sparse import csr_array
 from torch import Tensor, LongTensor
-from TAGLAS.utils.dataset import get_split_data
-from TAGLAS.data import TAGDataset
+from ...utils.dataset import get_split_data
+from ...data import TAGDataset
 from ..base import SubgraphTask, DefaultTask, DefaultTextTask, SubgraphTextTask
 from ..process import subgraph_process
 

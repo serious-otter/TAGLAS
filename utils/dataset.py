@@ -9,7 +9,7 @@ import numpy as np
 import torch
 from torch import LongTensor, Tensor
 
-from TAGLAS.utils.graph import edge_index_to_csr_adj
+from .graph import edge_index_to_csr_adj
 
 
 def generate_link_split(edge_index: LongTensor, train_ratio: float = 0.85, test_ratio: float = 0.10,

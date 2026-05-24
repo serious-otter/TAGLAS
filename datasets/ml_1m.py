@@ -11,10 +11,10 @@ import pandas as pd
 import torch
 from torch import Tensor
 
-from TAGLAS.constants import HF_REPO_ID
-from TAGLAS.data import TAGDataset, TAGData, BaseDict
-from TAGLAS.utils.dataset import generate_link_split
-from TAGLAS.utils.io import download_url, extract_zip, download_hf_file
+from ..constants import HF_REPO_ID
+from ..data import TAGDataset, TAGData, BaseDict
+from ..utils.dataset import generate_link_split
+from ..utils.io import download_url, extract_zip, download_hf_file
 
 
 class ML1M(TAGDataset):

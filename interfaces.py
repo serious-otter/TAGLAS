@@ -7,10 +7,10 @@ from typing import (
 
 from torchmetrics import Metric
 
-from TAGLAS.data import *
-from TAGLAS.datasets import *
-from TAGLAS.evaluation import *
-from TAGLAS.tasks import *
+from .data import *
+from .datasets import *
+from .evaluation import *
+from .tasks import *
 
 DATASET_TO_CLASS_DICT = {
     "cora": Cora,

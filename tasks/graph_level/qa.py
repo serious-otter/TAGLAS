@@ -8,8 +8,8 @@ from typing import (
 
 import torch
 from torch import Tensor, LongTensor
-from TAGLAS.utils.dataset import get_split_data
-from TAGLAS.data import TAGData, TAGDataset
+from ...utils.dataset import get_split_data
+from ...data import TAGData, TAGDataset
 from .prediction import DefaultTextGPTask
 from ..process import value_to_tensor
 

@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 from datasets import load_dataset
 
-from TAGLAS.data import TAGData, BaseDict
+from ...data import TAGData, BaseDict
 from .mol_utils import smiles2graph
 
 NAME_TO_SPLIT = {"chemblpre": "chembl_pretraining",

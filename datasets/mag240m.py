@@ -16,11 +16,11 @@ from torch.utils.data import Dataset, DataLoader
 from torch_geometric.data import InMemoryDataset
 from tqdm import tqdm
 import json
-from TAGLAS.constants import HF_REPO_ID
-from TAGLAS.data import TAGDataset, TAGData, BaseDict
-from TAGLAS.data.dataset import ROOT
-from TAGLAS.utils.graph import safe_to_undirected
-from TAGLAS.utils.io import download_url, extract_zip, download_hf_file
+from ..constants import HF_REPO_ID
+from ..data import TAGDataset, TAGData, BaseDict
+from ..data.dataset import ROOT
+from ..utils.graph import safe_to_undirected
+from ..utils.io import download_url, extract_zip, download_hf_file
 
 
 class GenNodes(Dataset):

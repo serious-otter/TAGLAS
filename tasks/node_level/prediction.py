@@ -1,8 +1,8 @@
-from TAGLAS.data import TAGDataset
+from ...data import TAGDataset
 from ..base import DefaultTask, SubgraphTask, DefaultTextTask, SubgraphTextTask
 from torch import LongTensor, Tensor
 import torch
-from TAGLAS.utils.dataset import get_split_data
+from ...utils.dataset import get_split_data
 
 def default_labels(dataset: TAGDataset, split: str) -> tuple[LongTensor, Tensor, list]:
     r"""Obtain node prediction labels from each dataset for the specified split.

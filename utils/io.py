@@ -14,7 +14,7 @@ from torch_geometric.data import download_url
 from huggingface_hub import hf_hub_download
 import io
 import shutil
-from TAGLAS.constants import ROOT
+from ..constants import ROOT
 
 
 def torch_safe_save(obj: Any, path: str) -> None:

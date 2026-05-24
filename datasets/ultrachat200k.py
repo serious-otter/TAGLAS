@@ -10,8 +10,8 @@ from datasets import load_dataset
 from torch import Tensor
 from tqdm import tqdm
 
-from TAGLAS.data import TAGDataset, TAGData, BaseDict
-from TAGLAS.utils.dataset import generate_sample_split
+from ..data import TAGDataset, TAGData, BaseDict
+from ..utils.dataset import generate_sample_split
 
 
 class UltraChat200k(TAGDataset):

@@ -12,9 +12,9 @@ import torch
 from torch import Tensor
 from tqdm import tqdm
 
-from TAGLAS.constants import HF_REPO_ID
-from TAGLAS.data import TAGDataset, TAGData, BaseDict
-from TAGLAS.utils.io import extract_zip, download_hf_file
+from ..constants import HF_REPO_ID
+from ..data import TAGDataset, TAGData, BaseDict
+from ..utils.io import extract_zip, download_hf_file
 
 
 def textualize_graph(data):

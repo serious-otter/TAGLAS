@@ -3,16 +3,16 @@ from typing import (
     Callable, Any,
 )
 import os
-from TAGLAS.data import TAGData, TAGDataset
+from ..data import TAGData, TAGDataset
 import os.path as osp
-from TAGLAS.utils.io import download_url, extract_zip
+from ..utils.io import download_url, extract_zip
 import numpy as np
 import pandas as pd
 import torch
 import shutil
-from TAGLAS.data import BaseDict
+from ..data import BaseDict
 from torch_geometric.data import InMemoryDataset
-from TAGLAS.data.dataset import ROOT
+from ..data.dataset import ROOT
 from torch import Tensor
 
 

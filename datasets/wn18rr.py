@@ -10,10 +10,10 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from TAGLAS.constants import HF_REPO_ID
-from TAGLAS.data import BaseDict
-from TAGLAS.data import TAGDataset, TAGData
-from TAGLAS.utils.io import download_hf_file
+from ..constants import HF_REPO_ID
+from ..data import BaseDict
+from ..data import TAGDataset, TAGData
+from ..utils.io import download_hf_file
 
 
 class WN18RR(TAGDataset):

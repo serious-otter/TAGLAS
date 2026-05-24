@@ -10,9 +10,9 @@ import torch
 from numpy.random import randint
 from torch import Tensor
 from torch import LongTensor
-from TAGLAS.constants import HF_REPO_ID
-from TAGLAS.data import TAGData, TAGDataset, BaseDict
-from TAGLAS.utils.io import download_hf_file
+from ...constants import HF_REPO_ID
+from ...data import TAGData, TAGDataset, BaseDict
+from ...utils.io import download_hf_file
 from .gen_data import gen_graph, get_raw_dataset, NAME_TO_SPLIT
 
 

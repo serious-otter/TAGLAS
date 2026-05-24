@@ -6,8 +6,8 @@ from typing import (
 
 import torch
 from torch import Tensor, LongTensor
-from TAGLAS.utils.dataset import get_split_data
-from TAGLAS.data import TAGData, TAGDataset
+from ...utils.dataset import get_split_data
+from ...data import TAGData, TAGDataset
 from ..base import DefaultTask, DefaultTextTask
 from ..process import value_to_tensor, parallel_build_sample_process
 

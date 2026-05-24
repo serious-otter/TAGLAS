@@ -8,10 +8,10 @@ import torch
 from torch import Tensor
 from torch_geometric.loader.dataloader import Collater
 
-from TAGLAS.data import TAGData
-from TAGLAS.tasks import GQATask
-from TAGLAS.tasks.base import BaseTask
-from TAGLAS.tasks.base import QATask
+from ..data import TAGData
+from ..tasks import GQATask
+from ..tasks.base import BaseTask
+from ..tasks.base import QATask
 
 
 class QATaskCollections():

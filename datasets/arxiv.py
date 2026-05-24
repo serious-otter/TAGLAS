@@ -13,11 +13,11 @@ import torch
 from torch import LongTensor
 from torch import Tensor
 
-from TAGLAS.constants import HF_REPO_ID
-from TAGLAS.data import TAGDataset, TAGData, BaseDict
-from TAGLAS.utils.graph import safe_to_undirected
-from TAGLAS.utils.io import download_url, extract_zip, move_files_in_dir, download_hf_file
-from TAGLAS.utils.dataset import generate_link_split_loop
+from ..constants import HF_REPO_ID
+from ..data import TAGDataset, TAGData, BaseDict
+from ..utils.graph import safe_to_undirected
+from ..utils.io import download_url, extract_zip, move_files_in_dir, download_hf_file
+from ..utils.dataset import generate_link_split_loop
 
 class Arxiv(TAGDataset):
     r"""Arxiv citation network dataset.

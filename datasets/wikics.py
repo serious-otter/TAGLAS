@@ -11,11 +11,11 @@ import numpy as np
 import torch
 from torch import Tensor
 
-from TAGLAS.constants import HF_REPO_ID
-from TAGLAS.data import BaseDict
-from TAGLAS.data.dataset import TAGDataset, TAGData
-from TAGLAS.utils.graph import safe_to_undirected
-from TAGLAS.utils.io import download_hf_file
+from ..constants import HF_REPO_ID
+from ..data import BaseDict
+from ..data.dataset import TAGDataset, TAGData
+from ..utils.graph import safe_to_undirected
+from ..utils.io import download_hf_file
 
 
 class WikiCS(TAGDataset):

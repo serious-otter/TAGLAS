@@ -6,7 +6,7 @@ from typing import (
 )
 import torch
 from torch import Tensor
-from TAGLAS.utils.text import pattern_exist, extract_numbers, normalize_text, pattern_search
+from ..utils.text import pattern_exist, extract_numbers, normalize_text, pattern_search
 from torchmetrics.regression import MeanSquaredError, MeanAbsoluteError, MeanSquaredLogError
 from torchmetrics.functional.regression.mae import _mean_absolute_error_update
 from torchmetrics.functional.regression.mse import _mean_squared_error_update

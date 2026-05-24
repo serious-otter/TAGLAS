@@ -4,8 +4,8 @@ from typing import (
 
 import numpy as np
 from torch import Tensor, LongTensor
-from TAGLAS.utils.dataset import get_split_data
-from TAGLAS.data import TAGDataset
+from ...utils.dataset import get_split_data
+from ...data import TAGDataset
 from ..base import QATask
 from ..process import subgraph_process
 

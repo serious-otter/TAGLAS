@@ -11,7 +11,7 @@ import torch
 from torch import Tensor
 from torch_geometric.data import InMemoryDataset
 
-from TAGLAS.constants import ROOT
+from ..constants import ROOT
 from .data import TAGData
 from copy import deepcopy as c
 import numpy as np

@@ -12,7 +12,7 @@ import torch
 from torch import Tensor
 from tqdm import tqdm
 
-from TAGLAS.data import TAGDataset, TAGData, BaseDict
+from ..data import TAGDataset, TAGData, BaseDict
 import datasets
 
 class WebQSP(TAGDataset):

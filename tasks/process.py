@@ -12,8 +12,8 @@ from torch.utils.data import Dataset, DataLoader
 from torch_sparse import SparseTensor
 from tqdm import tqdm
 
-from TAGLAS.utils.graph import k_hop_subgraph, sample_k_hop_subgraph_sparse
-from TAGLAS.utils.io import torch_safe_save, torch_safe_load
+from ..utils.graph import k_hop_subgraph, sample_k_hop_subgraph_sparse
+from ..utils.io import torch_safe_save, torch_safe_load
 
 
 def text2feature(

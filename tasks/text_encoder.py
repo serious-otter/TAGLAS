@@ -5,7 +5,7 @@ import torch.nn.functional as F
 from tqdm.autonotebook import trange
 from transformers import (LlamaForCausalLM, LlamaTokenizer, AutoTokenizer, AutoModel)
 
-from TAGLAS.utils.gpu import get_available_devices
+from ..utils.gpu import get_available_devices
 import os
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 LLM_DIM_DICT = {"ST": 768, "BERT": 768, "e5": 1024, "llama2_7b": 4096, "llama2_13b": 5120}

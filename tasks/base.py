@@ -19,8 +19,8 @@ from torch import Tensor, LongTensor
 from torch.utils.data import Dataset
 from torch_geometric.loader.dataloader import Collater
 
-from TAGLAS.data import TAGDataset, TAGData
-from TAGLAS.utils.graph import edge_index_to_sparse_csr, personalized_pagerank
+from ..data import TAGDataset, TAGData
+from ..utils.graph import edge_index_to_sparse_csr, personalized_pagerank
 from .process import feature_embedding_process, subgraph_process, value_to_tensor, parallel_build_sample_process
 
 

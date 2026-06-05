@@ -198,7 +198,6 @@ class MAG240M(TAGDataset):
         with open(raw_paths[self.RAW_CATEGORY_DESC], encoding="utf-8") as f:
             category_desc = json.load(f)
         label_names = []
-        label_text_list = []
         ordered_desc = BaseDict()
         for i in range(len(category_desc)):
             label = category_desc[i]["name"]
@@ -207,9 +206,9 @@ class MAG240M(TAGDataset):
             ordered_desc[label] = desc
 
         print("Saving label...")
-        torch.save(label_text_list, processed_paths[self._processed_name("label")], pickle_protocol=4)
+        torch.save(label_names, processed_paths[self._processed_name("label")], pickle_protocol=4)
 
-        del label_text_list
+        del label_names
         gc.collect()
         edge_attr = ["Connected two papers have a citation relationship."]
         torch.save(edge_attr, processed_paths[self._processed_name("edge_attr")], pickle_protocol=4)

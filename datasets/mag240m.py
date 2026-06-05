@@ -61,6 +61,12 @@ class MAG240M(TAGDataset):
     data_url = 'https://dgl-data.s3-accelerate.amazonaws.com/dataset/OGB-LSC/mag240m_kddcup2021.zip'
     mapping_url = "http://snap.stanford.edu/ogb/data/lsc/mapping/mag240m_mapping.zip"
     graph_description = "This is a citation network from microsoft academic graph platform. Nodes represent academic papers and edges represent citation relationship. "
+    RAW_META = "meta.pt"
+    RAW_SPLIT = "split_dict.pt"
+    RAW_TEXT = osp.join("mag240m_mapping", "text.csv")
+    RAW_NODE_LABEL = osp.join("processed", "paper", "node_label.npy")
+    RAW_CATEGORY_DESC = "mag240m.json"
+    RAW_EDGE_INDEX = osp.join("processed", "paper___cites___paper", "edge_index.npy")
 
     def __init__(
             self,
@@ -81,25 +87,43 @@ class MAG240M(TAGDataset):
         super(InMemoryDataset, self).__init__(root, transform, pre_transform, pre_filter)
         update_dict = {}
         key_name_list = ["x", "node_map", "edge_attr", "edge_map", "edge_index", "label", "label_map", "side_data"]
-        for i, path in enumerate(self.processed_paths):
+        processed_paths = self._processed_paths_by_name()
+        for key_name in key_name_list:
+            path = processed_paths[self._processed_name(key_name)]
             data = torch.load(path, weights_only=False)
-            update_dict[key_name_list[i]] = data
+            update_dict[key_name] = data
         data = TAGData(**update_dict)
         self.data, self.slices = self.collate([data])
 
     def raw_file_names(self) -> list:
-        return ["meta.pt", "split_dict.pt", osp.join("mag240m_mapping", "text.csv"),
-                osp.join("processed", "paper", "node_label.npy"),
-                "mag240m.json",
-                osp.join("processed", "paper___cites___paper", "edge_index.npy")]
+        return [
+            self.RAW_META,
+            self.RAW_SPLIT,
+            self.RAW_TEXT,
+            self.RAW_NODE_LABEL,
+            self.RAW_CATEGORY_DESC,
+            self.RAW_EDGE_INDEX,
+        ]
 
     def processed_file_names(self) -> list:
-        suffix = ""
-        if self.subset:
-            suffix = "_subset"
-        return [f"x{suffix}.pkl", f"node_map{suffix}.pkl", f"edge_attr{suffix}.pkl",
-                f"edge_map{suffix}.pkl", f"edge_index{suffix}.pkl", f"label{suffix}.pkl",
-                f"label_map{suffix}.pkl", f"side_data{suffix}.pkl"]
+        stems = ("x", "node_map", "edge_attr", "edge_map", "edge_index", "label", "label_map", "side_data")
+        return [self._processed_name(stem) for stem in stems]
+
+    @staticmethod
+    def _paths_by_name(file_names, paths) -> dict[str, str]:
+        if callable(file_names):
+            file_names = file_names()
+        return dict(zip(file_names, paths))
+
+    def _raw_paths_by_name(self) -> dict[str, str]:
+        return self._paths_by_name(self.raw_file_names, self.raw_paths)
+
+    def _processed_paths_by_name(self) -> dict[str, str]:
+        return self._paths_by_name(self.processed_file_names, self.processed_paths)
+
+    def _processed_name(self, stem: str) -> str:
+        suffix = "_subset" if self.subset else ""
+        return f"{stem}{suffix}.pkl"
 
     def download(self):
         data_path = download_url(self.data_url, self.root)
@@ -163,12 +187,15 @@ class MAG240M(TAGDataset):
                 "Generating mag240m subset. Will use multiprocess with large number of workers for faster process. "
                 "You can set num_workers to fit your server.")
 
+        raw_paths = self._raw_paths_by_name()
+        processed_paths = self._processed_paths_by_name()
+
         # only include paper2paper relation as we don't have text features for other two node type.
-        node_split = torch.load(self.raw_paths[1], weights_only=False)
+        node_split = torch.load(raw_paths[self.RAW_SPLIT], weights_only=False)
         node_split = BaseDict(**node_split)
 
         # additional label description.
-        with open(self.raw_paths[-1]) as f:
+        with open(raw_paths[self.RAW_CATEGORY_DESC], encoding="utf-8") as f:
             category_desc = json.load(f)
         label_names = []
         label_text_list = []
@@ -180,16 +207,16 @@ class MAG240M(TAGDataset):
             ordered_desc[label] = desc
 
         print("Saving label...")
-        torch.save(label_text_list, self.processed_paths[5], pickle_protocol=4)
+        torch.save(label_text_list, processed_paths[self._processed_name("label")], pickle_protocol=4)
 
         del label_text_list
         gc.collect()
         edge_attr = ["Connected two papers have a citation relationship."]
-        torch.save(edge_attr, self.processed_paths[2], pickle_protocol=4)
+        torch.save(edge_attr, processed_paths[self._processed_name("edge_attr")], pickle_protocol=4)
 
-        meta_data = torch.load(self.raw_paths[0], weights_only=False)
+        meta_data = torch.load(raw_paths[self.RAW_META], weights_only=False)
         num_nodes = meta_data["paper"]
-        edge_index = torch.from_numpy(np.load(self.raw_paths[-1]))
+        edge_index = torch.from_numpy(np.load(raw_paths[self.RAW_EDGE_INDEX]))
         print("begin process edge_index")
         if self.subset:
             subset_node, subset_edge_index = self.generate_subset(num_nodes, node_split, edge_index)
@@ -211,11 +238,11 @@ class MAG240M(TAGDataset):
 
         edge_index, _ = safe_to_undirected(edge_index)
         print("Saving edge...")
-        torch.save(edge_index, self.processed_paths[4], pickle_protocol=4)
+        torch.save(edge_index, processed_paths[self._processed_name("edge_index")], pickle_protocol=4)
 
         num_edges = edge_index.size(-1)
         edge_map = torch.zeros([num_edges], dtype=torch.long)
-        torch.save(edge_map, self.processed_paths[3], pickle_protocol=4)
+        torch.save(edge_map, processed_paths[self._processed_name("edge_map")], pickle_protocol=4)
         del edge_index
         del edge_map
         gc.collect()
@@ -226,7 +253,7 @@ class MAG240M(TAGDataset):
         total_chunks = num_nodes // chunksize
         chunk_idx = 0
         print(total_chunks)
-        for chunk in tqdm(pd.read_csv(self.raw_paths[2], chunksize=chunksize), total=total_chunks):
+        for chunk in tqdm(pd.read_csv(raw_paths[self.RAW_TEXT], chunksize=chunksize), total=total_chunks):
             print(chunk_idx)
             chunk = chunk.fillna("missing")
             text = (
@@ -241,13 +268,13 @@ class MAG240M(TAGDataset):
         if self.subset:
             node_text_ls = [node_text_ls[idx] for idx in subset_node]
 
-        label_map = torch.from_numpy(np.load(self.raw_paths[3])).long()
+        label_map = torch.from_numpy(np.load(raw_paths[self.RAW_NODE_LABEL])).long()
         label_map = label_map[subset_node]
-        torch.save(label_map, self.processed_paths[6], pickle_protocol=4)
+        torch.save(label_map, processed_paths[self._processed_name("label_map")], pickle_protocol=4)
 
-        torch.save(node_text_ls, self.processed_paths[0], pickle_protocol=4)
+        torch.save(node_text_ls, processed_paths[self._processed_name("x")], pickle_protocol=4)
         node_map = torch.arange(len(node_text_ls), dtype=torch.long)
-        torch.save(node_map, self.processed_paths[1], pickle_protocol=4)
+        torch.save(node_map, processed_paths[self._processed_name("node_map")], pickle_protocol=4)
         del node_text_ls
         del node_map
         gc.collect()
@@ -259,10 +286,12 @@ class MAG240M(TAGDataset):
 
     def process(self) -> None:
         side_data = self.gen_data()
+        processed_paths = self._processed_paths_by_name()
+        side_data_path = processed_paths[self._processed_name("side_data")]
         if side_data is not None:
-            torch.save(side_data, self.processed_paths[-1])
+            torch.save(side_data, side_data_path)
         else:
-            torch.save("No side data", self.processed_paths[-1])
+            torch.save("No side data", side_data_path)
 
     def get_NP_indexs_labels(self, split: str = "train") -> tuple[Tensor, Tensor, list]:
         r"""Return sample labels and their corresponding index for the node-level tasks and the given split.

@@ -110,10 +110,14 @@ class WikiKG90M(TAGDataset):
         edge_attr = get_rel_text(rel_raw_text)
         labels = rel_raw_text["title"].values.tolist()
         ordered_desc = BaseDict()
-        for i in range(rel_raw_text.shape[0]):
-            label = rel_raw_text.iloc[i, 1]
-            desc = rel_raw_text.iloc[i, 2]
-            ordered_desc[label] = desc
+
+        # for i in range(rel_raw_text.shape[0]):
+        #     label = rel_raw_text.iloc[i, 1]
+        #     desc = rel_raw_text.iloc[i, 2]
+        #     ordered_desc[label] = desc
+        ordered_desc = BaseDict(
+            zip(rel_raw_text["title"], rel_raw_text["desc"])
+        )
 
         if fast_data_load:
             node_raw_text = pd.read_csv(self.raw_paths[5], index_col=0)
@@ -140,29 +144,37 @@ class WikiKG90M(TAGDataset):
             valid_hrt = np.concatenate(
                 [valid_dict["hr"], valid_dict["t"].reshape(-1, 1)], axis=1
             )
-            edge_index = []
-            edge_map = []
-            for triplet in train_hrt:
-                edge_index.append(
-                    [
-                        triplet[0],
-                        triplet[2],
-                    ]
-                )
-                edge_map.append(triplet[1])
-            num_train = len(edge_index)
-            for triplet in valid_hrt:
-                edge_index.append(
-                    [
-                        triplet[0],
-                        triplet[2],
-                    ]
-                )
-                edge_map.append(triplet[1])
-            num_val = len(edge_index) - num_train
+            # edge_index = []
+            # edge_map = []
+            # for triplet in train_hrt:
+            #     edge_index.append(
+            #         [
+            #             triplet[0],
+            #             triplet[2],
+            #         ]
+            #     )
+            #     edge_map.append(triplet[1])
+            # num_train = len(edge_index)
+            # for triplet in valid_hrt:
+            #     edge_index.append(
+            #         [
+            #             triplet[0],
+            #             triplet[2],
+            #         ]
+            #     )
+            #     edge_map.append(triplet[1])
+            # num_val = len(edge_index) - num_train
 
-            edge_index = torch.tensor(edge_index).transpose(0, 1)
-            edge_map = torch.tensor(edge_map)
+            # edge_index = torch.tensor(edge_index).transpose(0, 1)
+            # edge_map = torch.tensor(edge_map)
+            # label_map = edge_map
+            num_train = train_hrt.shape[0]
+            num_val = valid_hrt.shape[0]
+            all_hrt = np.concatenate([train_hrt, valid_hrt], axis=0)
+            edge_index = torch.from_numpy(
+                np.stack([all_hrt[:, 0], all_hrt[:, 2]], axis=0)
+            ).long()
+            edge_map = torch.from_numpy(all_hrt[:, 1]).long()
             label_map = edge_map
 
             keep_edges = torch.arange(num_train)
@@ -207,10 +219,15 @@ class WikiKG90M(TAGDataset):
             **kwargs: Other arguments.
         """
         q_list = ["What is the relationship between two target entities?"]
-        answer_list = []
         label_features = self.label
-        for l in label_map:
-            answer_list.append(str(label_features[l]) + ".")
+
+        # answer_list = []
+        # for l in label_map:
+        #     answer_list.append(str(label_features[l]) + ".")
+        label_map_arr = np.array(label_map)
+        label_strs = np.array(label_features, dtype=object)
+        answer_list = (label_strs[label_map_arr] + ".").tolist()
+
         a_list, a_idxs = np.unique(np.array(answer_list, dtype=object), return_inverse=True)
         a_list = a_list.tolist()
         label_map = [[0, l_idx, a_idx] for l_idx, a_idx in zip(label_map, a_idxs)]
